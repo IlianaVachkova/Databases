@@ -1,0 +1,23 @@
+					task1
+	What does the XML language represent? What is it used for?
+
+	Extensible Markup Language (XML) is used to describe data. The XML standard is a flexible way to create information formats and
+electronically share structured data via the public Internet, as well as via corporate networks.
+	XML data is known as self-describing or self-defining, meaning that the structure of the data is embedded with the data, thus when
+the data arrives there is no need to pre-build the structure to store the data; it is dynamically understood within the XML. 
+	The XML format can be used by any individual or group of individuals or companies that want to share information in a consistent
+way. XML is actually a simpler and easier-to-use subset of the Standard Generalized Markup Language (SGML), which is the standard to
+create a document structure.
+
+
+					task3
+	What do namespaces represent in an XML document? What are they used for?
+	
+	XML Namespaces provide a method to avoid element name conflicts.
+	XML namespaces are used for providing uniquely named elements and attributes in an XML document. They are defined in a W3C
+recommendation. An XML instance may contain element or attribute names from more than one XML vocabulary. If each vocabulary is given
+a namespace, the ambiguity between identically named elements or attributes can be resolved.
+	A simple example would be to consider an XML instance that contained references to a customer and an ordered product. Both the
+customer element and the product element could have a child element named id. References to the id element would therefore be
+ambiguous; placing them in different namespaces would remove the ambiguity.
+ 

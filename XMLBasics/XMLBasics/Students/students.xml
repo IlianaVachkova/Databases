@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet type="text/xsl" href="studentsStyle.xslt" ?>
+<students xmlns:students="urn:students">
+  <student>
+    <name>Pesho Peshev</name>
+    <sex>Male</sex>
+    <birthDate>1989-10-12</birthDate>
+    <phone>0889 99 88 99</phone>
+    <email>pesho@peshev.com</email>
+    <course>DataBases</course>
+    <specialty>DB Development</specialty>
+    <facultyNumber>345867890</facultyNumber>
+    <examsTaken>
+      <exam>
+        <name>Data Structures</name>
+        <tutor>Kostov</tutor>
+        <score>350</score>
+      </exam>
+      <exam>
+        <name>JS Apps</name>
+        <tutor>Minkov</tutor>
+        <score>96</score>
+      </exam>
+    </examsTaken>
+  </student>
+  <student>
+    <name>Pesho Peshev</name>
+    <sex>Male</sex>
+    <birthDate>1989-10-12</birthDate>
+    <phone>0889 99 88 99</phone>
+    <email>pesho@peshev.com</email>
+    <course>DataBases</course>
+    <specialty>DB Development</specialty>
+    <facultyNumber>534567890</facultyNumber>
+    <examsTaken>
+      <exam>
+        <name>Data Structures</name>
+        <tutor>Kostov</tutor>
+        <score>350</score>
+      </exam>
+      <exam>
+        <name>JS Apps</name>
+        <tutor>Minkov</tutor>
+        <score>96</score>
+      </exam>
+    </examsTaken>
+  </student>
+</students>

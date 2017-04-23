@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<people name="phonebook">
+	<person>
+		<name>Svetlin Nakov</name>
+		<address>Sofia, Strelcha 43</address>
+		<number>0888 33 55 33</number>
+	</person>
+	<person>
+		<name>Nikolay Kostov</name>
+		<address>Sofia, Gorublqne</address>
+		<number>0889 44 33 55</number>
+	</person>
+	<person>
+		<name>George Georgiev</name>
+		<address>Gabrovo, Oborishte</address>
+		<number>0898 98 98 76</number>
+	</person>
+	<person>
+		<name>Doncho Minkov</name>
+		<address>Burgas, Nadejda</address>
+		<number>0899 33 444 5</number>
+	</person>
+</people>

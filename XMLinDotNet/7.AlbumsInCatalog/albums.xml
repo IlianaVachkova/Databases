@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<albums>
+	<album>
+		<name>One</name>
+		<artist>Metallica</artist>
+	</album>
+	<album>
+		<name>Gve me fuel</name>
+		<artist>Deep Purple</artist>
+	</album>
+	<album>
+		<name>Two</name>
+		<artist>Metallica</artist>
+	</album>
+	<album>
+		<name>Two</name>
+		<artist>Metallica</artist>
+	</album>
+</albums>

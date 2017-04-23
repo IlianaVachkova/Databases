@@ -1,0 +1,198 @@
+1.-------------------------------------------------------
+
+	CREATE PROC dbo.usp_SelectFullNames
+	AS
+	BEGIN
+		SELECT FirstName + ' ' + LastName AS [Full Name]
+		FROM Persons
+	END
+	GO
+
+	EXEC dbo.usp_SelectFullNames
+
+2.-------------------------------------------------------
+
+	CREATE PROC dbo.usp_CalcMoreMoney(
+		@number int)
+	AS
+	BEGIN
+		SELECT DISTINCT p.FirstName + ' ' + p.LastName AS [Full Name]
+		FROM Persons p JOIN Accounts a
+			ON p.PersonId = a.PersonId
+		WHERE a.Balance > @number
+	END
+	GO
+
+	EXEC dbo.usp_CalcMoreMoney 20
+
+3.-------------------------------------------------------
+
+	CREATE FUNCTION dbo.ufn_CalcInterest(
+		@sum money, @yearlyInterestRate money, @numberOfMonths money)
+	RETURNS money
+	AS
+	BEGIN
+		DECLARE @result decimal
+		SET @result = (@sum * @yearlyInterestRate * @numberOfMonths) / 12
+		RETURN @result
+	END
+	GO
+
+	SELECT dbo.ufn_CalcInterest(234, 5.6, 4.23) AS Result
+
+4.-------------------------------------------------------
+
+	CREATE PROC dbo.usp_CalcPersonInterest(@accountId int, @interestRate money)
+	AS
+	BEGIN
+		DECLARE @sum money = (
+			SELECT Balance FROM Accounts WHERE AccountId = @accountId) 
+		DECLARE @result money = dbo.ufn_CalcInterest(@sum, @interestRate, 1)
+		RETURN @result
+	END
+	GO
+
+	DECLARE @result money, @rate money, @id int
+	SET @rate = 3.5
+	SELECT @id = AccountId FROM Accounts
+	EXEC @result = dbo.usp_CalcPersonInterest @id, @rate
+
+	SELECT p.FirstName + ' ' + p.LastName AS [Full Name], a.Balance, 
+		dbo.ufn_CalcInterest(a.Balance, 3.5, a.AccountId) AS [Interest per Month]
+	FROM Accounts a JOIN Persons p
+		ON a.PersonId = p.PersonId
+
+5.-------------------------------------------------------
+
+	ALTER PROC dbo.usp_DepositMoney(@accountId int, @money money)
+	AS
+	BEGIN
+		BEGIN TRAN T1
+		UPDATE Accounts
+		SET Balance = Balance + @money
+		WHERE AccountId = @accountId
+		COMMIT TRAN T1
+	END
+	GO
+
+
+	ALTER PROC dbo.usp_WithdrawMoney(@accountId int, @money money)
+	AS
+	BEGIN
+		BEGIN TRAN T2
+		UPDATE Accounts
+		SET Balance = Balance - @money
+		WHERE AccountId = @accountId
+		COMMIT TRAN T2
+	END
+	GO
+
+	EXEC dbo.usp_DepositMoney 1, 40
+	EXEC dbo.usp_WithdrawMoney 1, 30
+
+
+	SELECT p.FirstName + ' ' + p.LastName AS [Full Name], a.Balance
+		FROM Accounts a JOIN Persons p
+			ON a.PersonId = p.PersonId
+
+6.-------------------------------------------------------
+
+	ALTER TRIGGER dbo.tr_ChangeSumLog 
+		ON Accounts FOR UPDATE
+	AS
+	BEGIN
+		IF EXISTS(SELECT * FROM inserted)
+		BEGIN
+			DECLARE @accountId int, @oldSum money, @newSum money
+			SELECT @accountId = AccountId FROM inserted
+			SELECT @newSum = Balance FROM inserted
+			SELECT @oldSum = Balance FROM deleted
+
+			INSERT INTO Logs (AccountId, OldSum, NewSum)
+			VALUES (@accountId, @oldSum, @newSum)
+		END
+	END
+	GO
+
+7.-------------------------------------------------------
+
+	CREATE FUNCTION CheckIfHasLetters (@word nvarchar(20), @letters nvarchar(20))
+	RETURNS BIT
+	AS
+	BEGIN
+
+	DECLARE @lettersLen int = LEN(@letters),
+	@matches int = 0,
+	@currentChar nvarchar(1)
+
+	WHILE(@lettersLen > 0)
+	BEGIN
+		SET @currentChar = SUBSTRING(@letters, @lettersLen, 1)
+		IF(CHARINDEX(@currentChar, @word, 0) > 0)
+			BEGIN
+				SET @matches += 1
+				SET @lettersLen -= 1
+			END
+		ELSE
+			SET @lettersLen -= 1
+	END
+
+	IF(@matches >= LEN(@word) OR @matches >= LEN(@letters))
+		RETURN 1
+
+	RETURN 0
+	END
+
+	GO
+
+	CREATE FUNCTION NamesAndTowns(@letters nvarchar(20))
+	RETURNS @ResultTable TABLE
+	(
+	Name varchar(50) NOT NULL
+	)
+	AS
+	BEGIN
+
+	INSERT INTO @ResultTable
+	SELECT LastName  FROM Employees
+
+	INSERT INTO @ResultTable
+	SELECT FirstName FROM Employees
+
+	INSERT INTO @ResultTable
+	SELECT towns.Name FROM Towns towns
+
+	DELETE FROM @ResultTable
+	WHERE dbo.CheckIfHasLetters(Name, @letters) = 0
+
+	RETURN
+	END
+
+	GO
+
+	SELECT * FROM dbo.NamesAndTowns('oistmiahf')
+
+8.-------------------------------------------------------
+
+	DECLARE empCursor CURSOR READ_ONLY FOR
+	  SELECT e.FirstName, e.LastName, t.Name
+	  FROM Employees e 
+	  JOIN Addresses a
+		ON a.AddressID = e.AddressID
+		JOIN Towns t
+			ON t.TownID = a.TownID
+
+	OPEN empCursor
+	DECLARE @firstName char(20), @lastName char(20), @town char(20)
+	FETCH NEXT FROM empCursor INTO @firstName, @lastName, @town
+
+	WHILE @@FETCH_STATUS = 0
+	  BEGIN
+		PRINT @firstName + ' ' + @lastName + ' ' + @town
+		FETCH NEXT FROM empCursor 
+		INTO @firstName, @lastName, @town
+	  END
+
+	CLOSE empCursor
+	DEALLOCATE empCursor
+

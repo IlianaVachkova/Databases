@@ -1,0 +1,84 @@
+1.------------------------------------------------
+
+	CREATE TABLE Messages(
+	  MsgId int NOT NULL IDENTITY,
+	  MsgText nvarchar(MAX),
+	  MsgDate datetime,
+	  CONSTRAINT PK_Messages_MsgId PRIMARY KEY (MsgId)
+	)
+	GO
+
+	DECLARE @rowCount int = 100000000
+	WHILE (@rowCount > 0)
+	BEGIN
+		INSERT INTO Messages (MsgText, MsgDate)
+		VALUES ('Message ' + CONVERT(nvarchar(100), @RowCount) + ': ' + CONVERT(nvarchar(100), newid()),
+		DATEADD(month, CONVERT(varbinary, newid()) % (50 * 12), getdate()))
+		SET @rowCount -= 1
+	END
+	GO
+
+	SELECT MsgText, MsgDate FROM Messages
+	WHERE MsgDate BETWEEN '1-Jan-1800' AND '31-Dec-2020'
+
+2.------------------------------------------------
+
+	CREATE INDEX IDX_Messages_MsgDate ON Messages(MsgDate)
+
+	CHECKPOINT; DBCC DROPCLEANBUFFERS;
+
+	SELECT MsgText, MsgDate FROM Messages
+	WHERE MsgDate BETWEEN '1-Jan-1800' AND '31-Dec-2020'
+
+3.------------------------------------------------
+
+	SELECT MsgText, MsgDate FROM Messages
+	WHERE MsgText LIKE '%123%'
+
+	CREATE FULLTEXT CATALOG MessagesFullTextCatalog
+	WITH ACCENT_SENSITIVITY = OFF
+
+	CREATE FULLTEXT INDEX ON Messages(MsgText)
+	KEY INDEX PK_Messages_MsgId
+	ON MessagesFullTextCatalog
+	WITH CHANGE_TRACKING AUTO
+
+	SELECT MsgText, MsgDate FROM Messages
+	WHERE CONTAINS(MsgText, '123')
+
+4.------------------------------------------------
+
+	CREATE DATABASE PartitioningDB;
+
+	USE PartitioningDB;
+
+	CREATE TABLE Messages(
+	  MsgId int NOT NULL AUTO_INCREMENT,
+	  MsgText nvarchar(300),
+	  MsgDate datetime,
+	  PRIMARY KEY (MsgId, MsgDate)
+	) PARTITION BY RANGE(YEAR(MsgDate)) (
+		PARTITION p0 VALUES LESS THAN (1990),
+		PARTITION p1 VALUES LESS THAN (2000),
+		PARTITION p2 VALUES LESS THAN (2010),
+		PARTITION p3 VALUES LESS THAN MAXVALUE
+	);
+
+	DELIMITER $$
+	CREATE PROCEDURE insertData()
+	BEGIN
+		declare rowCount int;	
+		set rowCount = 1000;
+
+		WHILE rowCount > 0 
+		DO
+			INSERT INTO Messages (MsgText, MsgDate)
+			VALUES ('Message ', DATE_ADD('1990-12-31 23:59:59', INTERVAL 1 DAY));
+			SET rowCount = rowCount - 1;
+		END WHILE;
+	END $$
+	DELIMITER ;
+
+	CALL insertData();
+
+	SELECT MsgText, MsgDate FROM Messages WHERE YEAR(MsgDate) = 2010;
